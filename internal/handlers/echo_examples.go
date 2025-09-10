@@ -49,11 +49,22 @@ func EchoSQLiSafePrepared(c echo.Context) error {
 // EchoSQLiDBVuln uses tainted input in DB query sink
 func EchoSQLiDBVuln(c echo.Context) error {
 	id := c.QueryParam("id")
-	db, _ := sql.Open("sqlite3", ":memory:")
+	db, err := sql.Open("sqlite3", ":memory:")
+	if err != nil {
+		return err
+	}
 	defer db.Close()
-	// vulnerable query concatenation
-	q := "SELECT * FROM users WHERE id = '" + id + "'"
-	_, _ = db.Query(q)
+	// using prepared statement to prevent SQL injection
+	stmt, err := db.Prepare("SELECT * FROM users WHERE id = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+	rows, err := stmt.Query(id)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
 	return c.String(http.StatusOK, "ok")
 }
 
