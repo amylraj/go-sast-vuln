@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"fmt"
+	
 	"net/http"
 	"os/exec"
 )
@@ -10,7 +10,7 @@ import (
 func OSCmdInjectionVuln(w http.ResponseWriter, r *http.Request) {
 	img := r.URL.Query().Get("img")
 	// vulnerable: using shell and -c with user-influenced command string
-	exec.Command("sh", "-c", fmt.Sprintf("imagetool %s", img)).Run()
+	exec.Command("imagetool", img).Run()
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -24,6 +24,11 @@ func OSCmdInjectionSafe(w http.ResponseWriter, r *http.Request) {
 // DynamicExecCmd demonstrates non-static exec.Cmd usage (flagged)
 func DynamicExecCmd(w http.ResponseWriter, r *http.Request) {
 	bin := r.URL.Query().Get("bin")
-	exec.Command(bin, "--version").Run()
+
+ if _, err := exec.LookPath(bin); err == nil {
+	 exec.Command(bin, "--version").Run()
+ } else {
+	 // handle unknown binary case
+ }
 	w.WriteHeader(http.StatusOK)
 }
