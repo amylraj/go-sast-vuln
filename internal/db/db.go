@@ -11,8 +11,13 @@ func New() (*sql.DB, error) {
 }
 
 // UnsafeQuery executes a raw query string directly (for demo only).
-func UnsafeQuery(database *sql.DB, query string) (*sql.Rows, error) {
-	return database.Query(query)
+func SafeQuery(database *sql.DB, query string, args ...interface{}) (*sql.Rows, error) {
+	stmt, err := database.Prepare(query)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+	return stmt.Query(args...)
 }
 
 // SafeGetUserByID uses a prepared statement to avoid SQL injection.
