@@ -1,8 +1,9 @@
 package handlers
 
+// This package does not utilize CGI handlers, removing the import entirely for security reasons.
+
 import (
 	"net/http"
-	_ "net/http/cgi"
 )
 
 // CGIImportHandler exists to keep the import referenced
