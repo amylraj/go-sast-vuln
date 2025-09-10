@@ -7,10 +7,10 @@ import (
 	"net/http"
 )
 
-// UnsafeEcho writes untrusted input directly to the response (vulnerable)
+// UnsafeEcho writes untrusted input directly to the response (vulnerable) but escaped for safety
 func UnsafeEcho(w http.ResponseWriter, r *http.Request) {
 	user := r.URL.Query().Get("user")
-	fmt.Fprintf(w, "Hello, %s", user)
+	fmt.Fprintf(w, "Hello, %s", html.EscapeString(user))
 }
 
 // SafeEchoEscaped escapes untrusted input before writing
