@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"database/sql"
-	"fmt"
 	"net/http"
 )
 
@@ -13,8 +12,9 @@ func SQLiVuln(w http.ResponseWriter, r *http.Request) {
 
 	id := r.URL.Query().Get("id")
 	// vulnerable string concatenation
-	query := "SELECT * FROM users WHERE id = '" + id + "'"
-	_, _ = db.Query(query)
+	stmt, _ := db.Prepare("SELECT * FROM users WHERE id = ?")
+	defer stmt.Close()
+	_, _ = stmt.Query(id)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -39,8 +39,9 @@ func SQLiCrossFileFalsePositive(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Query().Get("id")
 	id = sanitizeID(id)
 
-	query := fmt.Sprintf("SELECT * FROM users WHERE id = '%s'", id)
-	_, _ = db.Query(query)
+	stmt, _ := db.Prepare("SELECT * FROM users WHERE id = ?")
+	defer stmt.Close()
+	_, _ = stmt.Query(id)
 	w.WriteHeader(http.StatusOK)
 }
 
